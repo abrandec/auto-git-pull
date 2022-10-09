@@ -269,18 +269,18 @@ fn clone_repo(repo: &str, save_dest: &str) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn repo_vibe_check(repo: String, save_dest: &str) -> Result<(), Box<dyn Error>> {
+fn repo_vibe_check(repo: String, _remote: String, reference: String, save_dest: &str) -> Result<(), Box<dyn Error>> {
     if let Ok(_repos) = clone_repo(&repo, save_dest) {
     } else {
         let repo_ = Repository::open(format!("{save_dest}/{repo}")).unwrap();
-        let mut remote = repo_.find_remote("origin")?;
-        let fetch_commit = do_fetch(&repo_, &["master"], &mut remote)?;
-        do_merge(&repo_, "master", fetch_commit).expect("BRUH MODE");
+        let mut remote = repo_.find_remote(&_remote)?;
+        let fetch_commit = do_fetch(&repo_, &[&reference], &mut remote)?;
+        do_merge(&repo_, &reference, fetch_commit).expect("BRUH MODE");
     }
     Ok(())
 }
 
-fn parse_repos_file(filepath: &str) -> Result<Vec<[String; 2]>, Box<dyn Error>> {
+fn parse_repos_file(filepath: &str) -> Result<Vec<[String; 4]>, Box<dyn Error>> {
     let reader = read_to_string(filepath)?;
     let mut repos = vec![];
     for line in reader.lines() {
@@ -288,6 +288,8 @@ fn parse_repos_file(filepath: &str) -> Result<Vec<[String; 2]>, Box<dyn Error>> 
         repos.push([
             linea.clone().nth(0).expect("Wrong format").to_string(),
             linea.clone().nth(1).expect("Wrong format").to_string(),
+            linea.clone().nth(2).expect("Wrong format").to_string(),
+            linea.clone().nth(3).expect("Wrong format").to_string(),
         ]);
     }
     Ok(repos)
@@ -310,7 +312,7 @@ async fn main() {
     loop {
         for repo in repos.iter() {
             repo_vibe_check(
-                format!("{}/{}", repo[0].clone(), repo[1].clone()),
+                format!("{}/{}", repo[0].clone(), repo[1].clone()), repo[2].clone(), repo[3].clone(),
                 &save_dest,
             )
             .expect("Vibes cannot be checked");

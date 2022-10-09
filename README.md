@@ -16,7 +16,6 @@ cargo build --release
 ```
 
 ## Known issues
-* "corrupted loose reference file: FETCH_HEAD" with some repos
 * No OAuth/SSH/etc authentication available
 
 ## License
